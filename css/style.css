@@ -82,13 +82,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   padding: 0 1.5rem;
 }
 
-/* Push page content below fixed header — on <main> not body */
-
-/* Extra safety: ensure nothing ever sits above or overlaps the header */
-.header ~ * {
-  position: relative;
-  z-index: 0;
-}
+/* Push page content below fixed header — handled by main { margin-top } above */
 
 /* ── Section base ── */
 .section {
@@ -188,25 +182,32 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 /* =====================================================
    HEADER / NAVBAR
    ===================================================== */
+
+/* 
+  Safe-area fix for phones with notch/dynamic island:
+  We extend the header's BACKGROUND into the safe area zone,
+  but keep the nav content sitting in the normal 72px zone below it.
+  This means: no white strip, and logo/burger are never clipped.
+*/
 .header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 9999;
-  height: var(--header-h);
+  /* Total visual height = nav height + notch zone */
+  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  /* Pad the TOP so nav sits below the notch, not inside it */
+  padding-top: env(safe-area-inset-top, 0px);
   display: flex;
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid var(--mid-gray);
   box-shadow: 0 2px 12px rgba(26,25,23,.08);
-  /* Safe area for iPhone notch — no white strip at top */
-  padding-top: env(safe-area-inset-top, 0px);
-  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
 }
 
+/* Push main content below the full header (nav + notch zone) */
 main {
-  /* Account for safe-area too */
   margin-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
 }
 
@@ -216,9 +217,9 @@ main {
   justify-content: space-between;
   gap: 2rem;
   width: 100%;
-  height: 100%;
-  /* Strictly clip to header height — nothing overflows */
-  overflow: hidden;
+  /* Height is exactly the nav zone, not including the notch padding */
+  height: var(--header-h);
+  /* NO overflow:hidden — that was clipping the logo */
 }
 
 .nav__logo {
@@ -226,6 +227,7 @@ main {
   flex-direction: column;
   line-height: 1;
   text-decoration: none;
+  flex-shrink: 0;
 }
 .nav__logo-main {
   font-family: var(--font-serif);
@@ -1072,17 +1074,17 @@ main {
     --section-pad: 56px;
   }
 
-  /* ── Shrink logo so it fits cleanly in 56px header ── */
-  .nav__logo-main { font-size: 1.15rem; }
-  .nav__logo-sub  { font-size: .42rem; letter-spacing: .18em; }
+  /* Shrink logo to fit neatly inside 56px nav zone */
+  .nav__logo-main { font-size: 1.1rem; }
+  .nav__logo-sub  { font-size: .4rem; letter-spacing: .16em; }
 
-  /* ── Tighten nav gap so nothing overflows ── */
-  .nav { gap: .75rem; padding: 0 1rem; }
+  /* Tighten nav spacing on mobile */
+  .nav { gap: .5rem; padding: 0 1rem; }
 
-  /* Nav */
+  /* Mobile nav dropdown — drops below full header height including safe area */
   .nav__list {
     position: fixed;
-    top: var(--header-h);
+    top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
     left: 0; right: 0;
     background: #ffffff;
     flex-direction: column;
