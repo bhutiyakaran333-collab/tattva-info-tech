@@ -8,8 +8,7 @@
 
 /* ── Contact Hero ── */
 .contact-hero {
-  /* body padding-top already clears header — only add extra top breathing room */
-  padding-top: 5rem;
+  padding-top: 4rem;
   padding-bottom: 5rem;
 }
 
