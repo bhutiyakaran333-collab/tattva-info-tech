@@ -126,9 +126,14 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   font-size: .875rem;
   font-weight: 500;
   letter-spacing: .04em;
-  transition: all var(--transition);
+  /* Only transition the specific properties we actually animate */
+  transition: background var(--transition), color var(--transition),
+              border-color var(--transition), transform var(--transition),
+              box-shadow var(--transition);
   white-space: nowrap;
   cursor: pointer;
+  /* Promote to own compositor layer — eliminates paint on hover */
+  will-change: transform;
 }
 .btn--dark {
   background: var(--dark);
@@ -185,11 +190,15 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   display: flex;
   align-items: center;
   transition: background var(--transition), box-shadow var(--transition);
+  /* Promote header to own layer so it never causes page repaint */
+  will-change: transform;
+  transform: translateZ(0);
 }
 .header--scrolled,
 .header--solid {
-  background: rgba(255,255,255,.97);
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,.96);
+  /* backdrop-filter removed — it forces the GPU to composite the entire page
+     beneath it on every frame, which is the #1 cause of scroll jank */
   box-shadow: 0 1px 20px rgba(26,25,23,.07);
 }
 
@@ -235,8 +244,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   gap: .3rem;
   transition: color var(--transition);
   position: relative;
-}
-.nav__link::after {
+}.nav__link::after {
   content: '';
   position: absolute;
   bottom: -4px; left: 0;
@@ -272,7 +280,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   height: 2px;
   background: var(--dark);
   border-radius: 2px;
-  transition: all var(--transition);
+  transition: transform var(--transition), opacity var(--transition);
 }
 .nav__burger:hover { background: var(--light-gray); }
 .nav__burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -299,13 +307,15 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   background-size: cover;
   background-position: center;
   opacity: 0;
-  transform: scale(1.03);
-  transition: opacity .9s ease, transform 1.2s ease;
+  /* Use only opacity for the transition — no scale transform.
+     Scale forces the browser to repaint the entire slide on every frame.
+     Opacity changes are handled entirely by the compositor (zero paint cost). */
+  transition: opacity .8s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  will-change: opacity;
 }
 .slide.active {
   opacity: 1;
-  transform: scale(1);
   pointer-events: auto;
 }
 
@@ -386,14 +396,14 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   width: 48px; height: 48px;
   border-radius: 50%;
   background: rgba(255,255,255,.15);
-  backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,.25);
   color: var(--white);
   font-size: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+  will-change: transform;
 }
 .slider__btn:hover {
   background: rgba(201,146,42,.85);
@@ -419,7 +429,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   background: rgba(255,255,255,.4);
   border: none;
   cursor: pointer;
-  transition: all var(--transition);
+  transition: background var(--transition), width var(--transition), border-radius var(--transition);
   padding: 0;
 }
 .dot.active {
@@ -498,7 +508,8 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform .6s ease;
+  transition: transform .5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 .about__image-frame:hover .about__image { transform: scale(1.04); }
 
@@ -581,8 +592,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   transition: background var(--transition), border-color var(--transition);
   cursor: default;
   overflow: hidden;
-}
-.service-card:hover {
+}.service-card:hover {
   background: var(--dark-3);
   border-color: var(--gold-dark);
 }
@@ -688,7 +698,9 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   overflow: hidden;
   background: var(--white);
   box-shadow: var(--shadow);
+  /* Only transition transform + box-shadow, not 'all' */
   transition: transform var(--transition), box-shadow var(--transition);
+  will-change: transform;
 }
 .project-card:hover {
   transform: translateY(-6px);
@@ -707,7 +719,8 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 .project-card__image {
   width: 100%; height: 100%;
   object-fit: cover;
-  transition: transform .6s ease;
+  transition: transform .5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 .project-card:hover .project-card__image { transform: scale(1.05); }
 
@@ -720,6 +733,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   justify-content: center;
   opacity: 0;
   transition: opacity var(--transition);
+  will-change: opacity;
 }
 .project-card:hover .project-card__overlay { opacity: 1; }
 
@@ -731,7 +745,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   border: 1.5px solid rgba(255,255,255,.6);
   border-radius: 50px;
   padding: .6rem 1.25rem;
-  transition: all var(--transition);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
 .project-card__link:hover {
   background: var(--gold);
@@ -778,6 +792,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   padding: 2rem;
   border: 1px solid var(--mid-gray);
   transition: box-shadow var(--transition), transform var(--transition);
+  will-change: transform;
 }
 .testimonial:hover {
   transform: translateY(-4px);
@@ -838,7 +853,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   border-radius: var(--radius);
   border: 1px solid var(--dark-3);
   color: rgba(255,255,255,.5);
-  transition: all var(--transition);
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
   cursor: default;
 }
 .tech__logo:hover {
@@ -903,7 +918,9 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   align-items: center;
   justify-content: center;
   color: rgba(255,255,255,.55);
-  transition: all var(--transition);
+  transition: background var(--transition), border-color var(--transition),
+              color var(--transition), transform var(--transition);
+  will-change: transform;
 }
 .footer__social svg { width: 16px; height: 16px; }
 .footer__social:hover {
@@ -975,8 +992,9 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
   opacity: 0;
   pointer-events: none;
   transform: translateY(16px);
-  transition: all var(--transition);
+  transition: opacity var(--transition), transform var(--transition), background var(--transition);
   z-index: 999;
+  will-change: transform, opacity;
 }
 .back-to-top.visible {
   opacity: 1;
@@ -993,21 +1011,39 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
    ===================================================== */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity .7s ease, transform .7s ease;
+  transform: translateY(28px);
+  /* Use cubic-bezier for a snappier, more premium feel */
+  transition: opacity .6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform .6s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Let GPU handle compositing */
+  will-change: opacity, transform;
 }
 [data-reveal].revealed {
   opacity: 1;
   transform: none;
+  /* Remove will-change after animation completes to free GPU memory */
+  will-change: auto;
 }
 [data-reveal="left"] {
-  transform: translateX(-32px);
+  transform: translateX(-28px);
 }
 [data-reveal="left"].revealed { transform: none; }
 [data-reveal="right"] {
-  transform: translateX(32px);
+  transform: translateX(28px);
 }
 [data-reveal="right"].revealed { transform: none; }
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+  .slide { transition: opacity .3s ease; }
+  html { scroll-behavior: auto; }
+}
 
 /* =====================================================
    RESPONSIVE — TABLET (≤ 1024px)
@@ -1043,7 +1079,6 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     top: var(--header-h);
     left: 0; right: 0;
     background: rgba(255,255,255,.98);
-    backdrop-filter: blur(10px);
     flex-direction: column;
     gap: 0;
     padding: 1rem 0 2rem;
@@ -1052,6 +1087,7 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
     transition: transform var(--transition);
     z-index: 999;
     box-shadow: 0 8px 32px rgba(26,25,23,.1);
+    will-change: transform;
   }
   .nav__list.open { transform: translateY(0); }
   .nav__link {
