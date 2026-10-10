@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btt     = document.getElementById('backToTop'); // cached once
   const navLinks = document.querySelectorAll('.nav__link');
 
-  // rAF-throttled scroll handler — one DOM write per frame max
+  // rAF-throttled scroll handler — only needed for back-to-top visibility now
   let scrollTicking = false;
   const onScroll = () => {
     if (scrollTicking) return;
     scrollTicking = true;
     requestAnimationFrame(() => {
       const y = window.scrollY;
-      header.classList.toggle('header--scrolled', y > 60);
+      // Header is always solid white — no class toggle needed
       if (btt) btt.classList.toggle('visible', y > 400);
       scrollTicking = false;
     });
