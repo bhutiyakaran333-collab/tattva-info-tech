@@ -83,8 +83,11 @@ button { cursor: pointer; border: none; background: none; font-family: var(--fon
 }
 
 /* Push page content below fixed header — on <main> not body */
-main {
-  margin-top: var(--header-h);
+
+/* Extra safety: ensure nothing ever sits above or overlaps the header */
+.header ~ * {
+  position: relative;
+  z-index: 0;
 }
 
 /* ── Section base ── */
@@ -190,7 +193,6 @@ main {
   top: 0;
   left: 0;
   right: 0;
-  /* z-index must be higher than everything — slider, sections, overlays */
   z-index: 9999;
   height: var(--header-h);
   display: flex;
@@ -198,8 +200,14 @@ main {
   background: #ffffff;
   border-bottom: 1px solid var(--mid-gray);
   box-shadow: 0 2px 12px rgba(26,25,23,.08);
-  /* NO transform, NO will-change — both create stacking contexts that
-     fight z-index on mobile WebKit/Blink and cause the header to disappear */
+  /* Safe area for iPhone notch — no white strip at top */
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+}
+
+main {
+  /* Account for safe-area too */
+  margin-top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
 }
 
 .nav {
@@ -207,6 +215,10 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
+  width: 100%;
+  height: 100%;
+  /* Strictly clip to header height — nothing overflows */
+  overflow: hidden;
 }
 
 .nav__logo {
@@ -291,21 +303,22 @@ main {
    HERO / IMAGE SLIDER
    ===================================================== */
 .hero {
-  /* No extra margin — main margin-top handles header clearance */
-  height: 56vh;
-  min-height: 400px;
-  max-height: 580px;
+  /* Let content determine height — no cropping ever */
+  height: auto;
+  min-height: 460px;
 }
 
 .slider {
   position: relative;
   width: 100%;
   height: 100%;
+  min-height: 460px;
   overflow: hidden;
   z-index: 1;
 }
 
 .slide {
+  /* Use relative positioning for the active slide so height is natural */
   position: absolute;
   inset: 0;
   display: flex;
@@ -316,6 +329,8 @@ main {
   transition: opacity .8s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   z-index: 1;
+  /* Give each slide a fixed height so slider has dimensions */
+  min-height: 460px;
 }
 .slide.active {
   opacity: 1;
@@ -350,9 +365,7 @@ main {
   position: relative;
   z-index: 2;
   max-width: 620px;
-  padding: 2rem 0;
-  /* Ensure content doesn't overflow slider height */
-  overflow: hidden;
+  padding: 3rem 0;
 }
 .slide__label {
   display: flex;
@@ -1094,11 +1107,11 @@ main {
 
   /* Slider */
   .hero {
-    height: 46vh;
-    min-height: 300px;
-    max-height: 400px;
+    min-height: 360px;
   }
-  .slide__content { max-width: 100%; padding: 1rem 0; }
+  .slider { min-height: 360px; }
+  .slide  { min-height: 360px; }
+  .slide__content { max-width: 100%; padding: 2rem 0; }
   .slide__title { font-size: clamp(1.6rem, 6vw, 2.4rem); }
   .slide__desc { font-size: .82rem; margin-bottom: 1rem; }
   .slider__btn { width: 34px; height: 34px; font-size: .85rem; }
@@ -1165,12 +1178,10 @@ main {
   .nav { gap: .5rem; padding: 0 .75rem; }
   .nav__burger { padding: 6px; }
 
-  .hero {
-    height: 42vh;
-    min-height: 260px;
-    max-height: 360px;
-  }
-  .slide__content { padding: .75rem 0; }
+  .hero    { min-height: 320px; }
+  .slider  { min-height: 320px; }
+  .slide   { min-height: 320px; }
+  .slide__content { padding: 1.5rem 0; }
   .slide__title { font-size: clamp(1.4rem, 5.5vw, 2rem); }
   .slide__desc { display: none; }
   .stats__grid { grid-template-columns: 1fr 1fr; }
