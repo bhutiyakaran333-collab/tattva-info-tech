@@ -8,7 +8,8 @@
 
 /* ── Contact Hero ── */
 .contact-hero {
-  padding-top: calc(var(--header-h) + 5rem);
+  /* body padding-top already clears header — only add extra top breathing room */
+  padding-top: 5rem;
   padding-bottom: 5rem;
 }
 
@@ -293,7 +294,7 @@
     gap: 3rem;
   }
   .contact-hero {
-    padding-top: calc(var(--header-h) + 3rem);
+    padding-top: 3rem;
     padding-bottom: 3rem;
   }
 }
